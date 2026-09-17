@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '../stores/auth.store';
+import IntroSplashView from '../views/IntroSplashView.vue';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/splash',
     name: 'IntroSplash',
-    component: () => import('../views/IntroSplashView.vue'),
+    component: IntroSplashView,
     meta: { public: true },
   },
   {

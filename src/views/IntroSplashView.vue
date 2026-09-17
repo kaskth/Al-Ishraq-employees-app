@@ -117,7 +117,7 @@ const currentStepIndex = computed(() => {
 const currentStepMessage = computed(() => steps[currentStepIndex.value].text);
 
 onMounted(() => {
-  // 5.5 seconds animation duration (55ms * 100 steps)
+  // 3.0 seconds smooth progress animation duration (30ms * 100 steps)
   timer = setInterval(() => {
     if (progressPercent.value < 100) {
       progressPercent.value += 1;
@@ -125,9 +125,9 @@ onMounted(() => {
       clearInterval(timer);
       setTimeout(() => {
         finishIntro();
-      }, 400);
+      }, 300);
     }
-  }, 55);
+  }, 30);
 });
 
 onUnmounted(() => {
