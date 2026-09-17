@@ -1,0 +1,22 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.npm/
+.vite/
+
+# Android build and IDE files
+android/.gradle/
+android/build/
+android/app/build/
+android/.idea/
+android/*.iml
+android/app/*.iml
+android/local.properties
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log

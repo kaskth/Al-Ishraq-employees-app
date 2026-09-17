@@ -1,0 +1,21 @@
+{
+  "appId": "com.aleshrak.mobile",
+  "appName": "مركز الإشراق الطبي - الكوادر",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "Geolocation": {
+      "permissions": ["location"]
+    },
+    "NativeBiometric": {
+      "title": "إثبات الحضور بالبصمة الحيوية",
+      "subtitle": "يرجى مسح البصمة أو الوجه للمتابعة",
+      "description": "تسجيل دخول وتأكيد دوام مركز الإشراق الطبي"
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}
