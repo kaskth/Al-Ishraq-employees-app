@@ -1,6 +1,19 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3010/api/v1/mobile-employees';
+// Dynamically determine the API Base URL:
+// 1. If VITE_API_BASE_URL is set in .env / .env.production, use it.
+// 2. In Production build (Mobile APK), default to the live server (http://213.199.52.14:3010/api/v1).
+// 3. In Development (npm run dev), default to local machine (http://localhost:3010/api/v1).
+const rawBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD
+    ? 'http://213.199.52.14:3010/api/v1'
+    : 'http://localhost:3010/api/v1');
+
+const sanitizedBase = rawBaseUrl.replace(/\/+$/, '');
+const API_BASE_URL = sanitizedBase.endsWith('/mobile-employees')
+  ? sanitizedBase
+  : `${sanitizedBase}/mobile-employees`;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
