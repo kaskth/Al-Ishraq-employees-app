@@ -46,17 +46,26 @@ export const useAuthStore = defineStore('auth', () => {
     return uuid;
   }
 
-  async function login(passcode: string) {
+  async function login(employeeIdOrPasscode: string | number, passwordInput?: string) {
     isLoading.value = true;
     errorMessage.value = null;
 
     try {
       const deviceUuid = getOrGenerateDeviceUuid();
-      const res = await apiClient.post('/auth/login', {
-        passcode,
+      const payload: any = {
         deviceUuid,
         deviceModel: navigator.userAgent,
-      });
+      };
+
+      if (passwordInput !== undefined) {
+        payload.employeeId = employeeIdOrPasscode;
+        payload.password = passwordInput;
+      } else {
+        // Fallback or Biometric with cached credentials
+        payload.passcode = String(employeeIdOrPasscode);
+      }
+
+      const res = await apiClient.post('/auth/login', payload);
 
       if (res.data.status && res.data.data) {
         token.value = res.data.data.token;
@@ -64,7 +73,10 @@ export const useAuthStore = defineStore('auth', () => {
 
         localStorage.setItem('mobile_auth_token', token.value!);
         localStorage.setItem('mobile_user_profile', JSON.stringify(user.value));
-        localStorage.setItem('saved_passcode_cached', passcode);
+        if (passwordInput !== undefined) {
+          localStorage.setItem('saved_employee_id', String(employeeIdOrPasscode));
+          localStorage.setItem('saved_password_cached', passwordInput);
+        }
 
         try {
           await Haptics.impact({ style: ImpactStyle.Medium });
@@ -97,11 +109,16 @@ export const useAuthStore = defineStore('auth', () => {
         description: 'تسجيل دخول سريع لمركز الإشراق الطبي',
       });
 
-      const savedPasscode = localStorage.getItem('saved_passcode_cached');
-      if (savedPasscode) {
-        return await login(savedPasscode);
+      const savedEmpId = localStorage.getItem('saved_employee_id');
+      const savedPass = localStorage.getItem('saved_password_cached');
+      const legacyPasscode = localStorage.getItem('saved_passcode_cached');
+
+      if (savedEmpId && savedPass) {
+        return await login(savedEmpId, savedPass);
+      } else if (legacyPasscode) {
+        return await login(legacyPasscode);
       } else {
-        return { success: false, message: 'يرجى تسجيل الدخول برمز المرور أولاً لربط البصمة الحيوية' };
+        return { success: false, message: 'يرجى تسجيل الدخول برقم المعرف وكلمة المرور أولاً لربط البصمة الحيوية' };
       }
     } catch (e: any) {
       return { success: false, message: 'تم إلغاء المصادقة أو عدم تطابق البصمة' };
@@ -137,6 +154,31 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function changePassword(oldPassword: string, newPassword: string) {
+    isLoading.value = true;
+    try {
+      const res = await apiClient.patch('/auth/change-password', {
+        oldPassword,
+        newPassword,
+      });
+
+      if (res.data.status) {
+        localStorage.setItem('saved_password_cached', newPassword);
+        try {
+          await Haptics.impact({ style: ImpactStyle.Heavy });
+        } catch (e) {}
+        showSuccessNotification(res.data.message || 'تم تغيير كلمة المرور وتشفيرها بنجاح');
+        return { success: true, message: res.data.message };
+      }
+      throw new Error(res.data.message || 'فشل تغيير كلمة المرور');
+    } catch (err: any) {
+      showErrorNotification(err, 'فشل تغيير كلمة المرور');
+      return { success: false, message: err.response?.data?.message || err.message };
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   function logout() {
     token.value = null;
     user.value = null;
@@ -156,6 +198,7 @@ export const useAuthStore = defineStore('auth', () => {
     isWorker,
     login,
     biometricLogin,
+    changePassword,
     fetchMe,
     updateProfile,
     logout,

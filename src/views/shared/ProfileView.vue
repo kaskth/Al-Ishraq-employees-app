@@ -101,6 +101,27 @@
       </button>
     </div>
 
+    <!-- Security & Account Settings Card -->
+    <div class="p-4 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/70 flex items-center justify-center text-amber-600">
+          <Lock class="w-5 h-5" />
+        </div>
+        <div>
+          <h4 class="text-xs font-black text-slate-900">أمان الحساب وكلمة المرور</h4>
+          <p class="text-[11px] text-slate-500 font-medium">تغيير الرقم السري لحماية حسابك وتشفيره</p>
+        </div>
+      </div>
+
+      <button
+        @click="showChangePasswordModal = true"
+        class="py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-brand-blue font-bold text-xs transition-all flex items-center gap-1 cursor-pointer"
+      >
+        <span>تغيير</span>
+        <ChevronLeft class="w-3.5 h-3.5 rtl-mirror" />
+      </button>
+    </div>
+
     <!-- My Requests History -->
     <div class="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-4">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -237,6 +258,11 @@
       v-model="showEditProfileModal"
       @profile-updated="authStore.fetchMe"
     />
+
+    <!-- Change Password Dialog -->
+    <ChangePasswordDialog
+      v-model="showChangePasswordModal"
+    />
   </div>
 </template>
 
@@ -245,8 +271,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth.store';
 import { useAttendanceStore } from '../../stores/attendance.store';
 import { useQuasar } from 'quasar';
-import { CalendarPlus, Clock } from 'lucide-vue-next';
+import { CalendarPlus, Clock, Lock, ChevronLeft } from 'lucide-vue-next';
 import EditProfileDialog from './components/EditProfileDialog.vue';
+import ChangePasswordDialog from './components/ChangePasswordDialog.vue';
 
 const $q = useQuasar();
 const authStore = useAuthStore();
@@ -262,6 +289,7 @@ const allRequests = computed(() => {
 const showLeaveModal = ref(false);
 const showPermissionModal = ref(false);
 const showEditProfileModal = ref(false);
+const showChangePasswordModal = ref(false);
 
 const leaveForm = ref({
   leaveType: 'ANNUAL',
