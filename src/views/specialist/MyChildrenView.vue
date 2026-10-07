@@ -52,6 +52,7 @@
               :src="getPhotoUrl(child.formalPersonalPhoto)"
               alt="Child"
               class="w-full h-full object-cover"
+              @error="handleImgError"
             />
             <span v-else>{{ child.name[0] }}</span>
           </div>
@@ -88,7 +89,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useTherapyStore } from '../../stores/therapy.store';
 import { ChevronLeft } from 'lucide-vue-next';
-import { getMediaUrl } from '../../utils/media';
+import { getMediaUrl, DEFAULT_CHILD_AVATAR } from '../../utils/media';
 
 const therapyStore = useTherapyStore();
 const searchQuery = ref('');
@@ -106,7 +107,14 @@ const filteredChildren = computed(() => {
 });
 
 function getPhotoUrl(path?: string) {
-  return getMediaUrl(path);
+  return getMediaUrl(path, DEFAULT_CHILD_AVATAR);
+}
+
+function handleImgError(e: Event) {
+  const target = e.target as HTMLImageElement;
+  if (target && target.src !== DEFAULT_CHILD_AVATAR) {
+    target.src = DEFAULT_CHILD_AVATAR;
+  }
 }
 
 function formatDate(d: string) {

@@ -4,7 +4,7 @@ import { Network } from '@capacitor/network';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { ref } from 'vue';
 import { Notify } from 'quasar';
-import { SERVER_STATIC_ROOT } from '../utils/media';
+import { SERVER_STATIC_ROOT, getMediaUrl } from '../utils/media';
 
 export interface UpdateManifest {
   version: string;
@@ -47,8 +47,17 @@ class UpdaterService {
       await CapacitorUpdater.notifyAppReady();
       console.log('[OTA Updater] App ready signal sent.');
 
+      try {
+        const appInfo = await App.getInfo();
+        if (appInfo?.version) {
+          this.currentVersion = appInfo.version;
+        }
+      } catch {
+        // App info fallback
+      }
+
       const currentBundle = await CapacitorUpdater.getLatest();
-      if (currentBundle && currentBundle.version) {
+      if (currentBundle && currentBundle.version && currentBundle.version !== 'builtin' && currentBundle.version !== 'default') {
         this.currentVersion = currentBundle.version;
       }
 
@@ -202,14 +211,18 @@ class UpdaterService {
           cache: 'no-cache',
         });
         if (res.ok) {
-          const data = await res.json();
-          // Normalize response
+          const json = await res.json();
+          // Support both direct manifest object and NestJS wrapped response ({ status: true, data: { ... } })
+          const payload = json && typeof json === 'object' && json.data ? json.data : json;
+          const rawUrl = payload.bundleUrl || payload.url;
+          const bundleUrl = getMediaUrl(rawUrl);
+
           return {
-            version: data.version || data.latestVersion,
-            buildNumber: data.buildNumber || data.build,
-            bundleUrl: data.bundleUrl || data.url,
-            mandatory: data.mandatory ?? false,
-            notes: data.notes || data.releaseNotes || '',
+            version: payload.version || payload.latestVersion,
+            buildNumber: payload.buildNumber || payload.build,
+            bundleUrl,
+            mandatory: payload.mandatory ?? false,
+            notes: payload.notes || payload.releaseNotes || '',
           };
         }
       } catch {

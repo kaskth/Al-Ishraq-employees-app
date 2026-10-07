@@ -36,7 +36,12 @@
         <div class="flex items-center justify-between border-b-2 border-slate-100 pb-5">
           <div class="flex items-center gap-3.5">
             <div class="w-14 h-14 rounded-2xl bg-white p-1 border border-slate-200 flex items-center justify-center overflow-hidden shadow-xs">
-              <img :src="getMediaUrl(reportData.centerInfo.logoUrl) || '/logo.png'" alt="Logo" class="w-full h-full object-contain" />
+              <img
+                :src="getMediaUrl(reportData.centerInfo.logoUrl) || '/logo.png'"
+                alt="Logo"
+                class="w-full h-full object-contain"
+                @error="(e) => (e.target as HTMLImageElement).src = '/logo.png'"
+              />
             </div>
             <div class="space-y-0.5">
               <h2 class="text-base font-black text-brand-navy">{{ reportData.centerInfo.name }}</h2>

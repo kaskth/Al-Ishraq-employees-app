@@ -30,6 +30,7 @@
           :src="getPhotoUrl(therapyStore.activeIep.formalPersonalPhoto)"
           alt="Child"
           class="w-full h-full object-cover"
+          @error="handleImgError"
         />
         <span v-else>{{ therapyStore.activeIep.name[0] }}</span>
       </div>
@@ -340,7 +341,7 @@ import {
   Download,
   Activity,
 } from 'lucide-vue-next';
-import { getMediaUrl } from '../../utils/media';
+import { getMediaUrl, DEFAULT_CHILD_AVATAR } from '../../utils/media';
 
 const route = useRoute();
 const router = useRouter();
@@ -360,7 +361,14 @@ onMounted(async () => {
 });
 
 function getPhotoUrl(path?: string) {
-  return getMediaUrl(path);
+  return getMediaUrl(path, DEFAULT_CHILD_AVATAR);
+}
+
+function handleImgError(e: Event) {
+  const target = e.target as HTMLImageElement;
+  if (target && target.src !== DEFAULT_CHILD_AVATAR) {
+    target.src = DEFAULT_CHILD_AVATAR;
+  }
 }
 
 function formatDate(d: string) {

@@ -34,6 +34,8 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Build Web Application
+        env:
+          VITE_API_BASE_URL: https://api.aleshrakcentre.com/api/v1
         run: npm run build
 
       - name: Package OTA Update Bundle
@@ -42,7 +44,8 @@ jobs:
           cd dist
           zip -r ../output-ota/bundle-v1.0.${{ github.run_number }}.zip ./*
           cd ..
-          cat << 'EOF' > output-ota/version.json
+          cp output-ota/bundle-v1.0.${{ github.run_number }}.zip output-ota/bundle-latest.zip
+          cat << EOF > output-ota/version.json
           {
             "version": "1.0.${{ github.run_number }}",
             "buildNumber": ${{ github.run_number }},
@@ -106,6 +109,7 @@ jobs:
           files: |
             output-apk/Al-Ishraq-Employees.apk
             output-ota/bundle-v1.0.${{ github.run_number }}.zip
+            output-ota/bundle-latest.zip
             output-ota/version.json
           draft: false
           prerelease: false

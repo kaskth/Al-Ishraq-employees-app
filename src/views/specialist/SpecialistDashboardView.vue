@@ -183,6 +183,7 @@
             :src="getPhotoUrl(scheduleStore.activeSessionContext.session.child.formalPersonalPhoto)"
             alt="Child"
             class="w-full h-full object-cover rounded-xl"
+            @error="handleImgError"
           />
           <div v-else class="w-full h-full flex items-center justify-center text-xl font-black text-white">
             {{ scheduleStore.activeSessionContext.session.child?.name?.[0] || 'ط' }}
@@ -414,7 +415,7 @@ import {
   Clock,
   Coffee,
 } from 'lucide-vue-next';
-import { getMediaUrl } from '../../utils/media';
+import { getMediaUrl, DEFAULT_CHILD_AVATAR } from '../../utils/media';
 
 const scheduleStore = useScheduleStore();
 const therapyStore = useTherapyStore();
@@ -427,7 +428,14 @@ onMounted(() => {
 });
 
 function getPhotoUrl(path?: string) {
-  return getMediaUrl(path);
+  return getMediaUrl(path, DEFAULT_CHILD_AVATAR);
+}
+
+function handleImgError(e: Event) {
+  const target = e.target as HTMLImageElement;
+  if (target && target.src !== DEFAULT_CHILD_AVATAR) {
+    target.src = DEFAULT_CHILD_AVATAR;
+  }
 }
 
 function openEvaluationDialog(session: TodaySession) {

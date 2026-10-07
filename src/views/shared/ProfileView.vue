@@ -9,6 +9,7 @@
             :src="getPhotoUrl(authStore.user.formalPersonalPhoto)"
             alt="Avatar"
             class="w-full h-full object-cover"
+            @error="handleImgError"
           />
           <span v-else>{{ authStore.user?.name?.[0] || 'م' }}</span>
         </div>
@@ -296,7 +297,7 @@ import { useAuthStore } from '../../stores/auth.store';
 import { useAttendanceStore } from '../../stores/attendance.store';
 import { useQuasar } from 'quasar';
 import { CalendarPlus, Clock, Lock, ChevronLeft, RefreshCw } from 'lucide-vue-next';
-import { getMediaUrl } from '../../utils/media';
+import { getMediaUrl, DEFAULT_AVATAR } from '../../utils/media';
 import {
   updaterService,
   isCheckingUpdate,
@@ -391,7 +392,14 @@ function getStatusLabel(status: string) {
 }
 
 function getPhotoUrl(path?: string) {
-  return getMediaUrl(path);
+  return getMediaUrl(path, DEFAULT_AVATAR);
+}
+
+function handleImgError(e: Event) {
+  const target = e.target as HTMLImageElement;
+  if (target && target.src !== DEFAULT_AVATAR) {
+    target.src = DEFAULT_AVATAR;
+  }
 }
 
 function formatDate(iso: string) {
