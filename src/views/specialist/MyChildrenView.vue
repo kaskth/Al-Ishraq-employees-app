@@ -88,6 +88,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useTherapyStore } from '../../stores/therapy.store';
 import { ChevronLeft } from 'lucide-vue-next';
+import { getMediaUrl } from '../../utils/media';
 
 const therapyStore = useTherapyStore();
 const searchQuery = ref('');
@@ -104,9 +105,8 @@ const filteredChildren = computed(() => {
   );
 });
 
-function getPhotoUrl(path: string) {
-  if (path.startsWith('http')) return path;
-  return `http://localhost:3010/${path.replace(/^\/+/, '')}`;
+function getPhotoUrl(path?: string) {
+  return getMediaUrl(path);
 }
 
 function formatDate(d: string) {

@@ -414,6 +414,7 @@ import {
   Clock,
   Coffee,
 } from 'lucide-vue-next';
+import { getMediaUrl } from '../../utils/media';
 
 const scheduleStore = useScheduleStore();
 const therapyStore = useTherapyStore();
@@ -425,9 +426,8 @@ onMounted(() => {
   scheduleStore.fetchTodaySchedule();
 });
 
-function getPhotoUrl(path: string) {
-  if (path.startsWith('http')) return path;
-  return `http://localhost:3010/${path.replace(/^\/+/, '')}`;
+function getPhotoUrl(path?: string) {
+  return getMediaUrl(path);
 }
 
 function openEvaluationDialog(session: TodaySession) {

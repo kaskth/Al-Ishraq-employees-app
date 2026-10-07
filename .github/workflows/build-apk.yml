@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK & OTA Bundle
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build & Package Android APK
+    name: Build & Package Android APK & OTA Bundle
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +35,23 @@ jobs:
 
       - name: Build Web Application
         run: npm run build
+
+      - name: Package OTA Update Bundle
+        run: |
+          mkdir -p output-ota
+          cd dist
+          zip -r ../output-ota/bundle-v1.0.${{ github.run_number }}.zip ./*
+          cd ..
+          cat << 'EOF' > output-ota/version.json
+          {
+            "version": "1.0.${{ github.run_number }}",
+            "buildNumber": ${{ github.run_number }},
+            "bundleUrl": "https://api.aleshrakcentre.com/uploads/updates/bundle-latest.zip",
+            "notes": "تحديث هوائي تلقائي v1.0.${{ github.run_number }}"
+          }
+          EOF
+          echo "OTA Bundle files:"
+          ls -lh output-ota
 
       - name: Sync Capacitor Android
         run: npx cap sync android
@@ -61,6 +78,13 @@ jobs:
           path: output-apk/Al-Ishraq-Employees.apk
           retention-days: 30
 
+      - name: Upload OTA Bundle as Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Al-Ishraq-OTA-Bundle
+          path: output-ota/*
+          retention-days: 30
+
       - name: Create GitHub Release with Direct APK Download
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/')
@@ -75,9 +99,14 @@ jobs:
               - المقاييس الإكلينيكية الأربعة (CARS-2, Portage, Vineland-3, Conners-3) بمعايير معتمدة 100%.
               - بصمة الحضور والانصراف والتحقق الجغرافي الذكي المعتمد.
               - حماية تامة ضد التزييف والتفويض.
+              - إصلاح مسارات وتحميل صور الأطفال والكوادر في الـ APK (الخادم الحي https://api.aleshrakcentre.com).
+              - حزمة التحديث الهوائي الفوري التلقائي (OTA Bundle) بدون الحاجة لإعادة تثبيت التطبيق مستقبلاً.
             
             يمكنك تحميل ملف الـ APK وتثبيته مباشرة على هواتف أندرويد عبر الرابط أدناه.
-          files: output-apk/Al-Ishraq-Employees.apk
+          files: |
+            output-apk/Al-Ishraq-Employees.apk
+            output-ota/bundle-v1.0.${{ github.run_number }}.zip
+            output-ota/version.json
           draft: false
           prerelease: false
         env:

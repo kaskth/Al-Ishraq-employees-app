@@ -253,6 +253,30 @@
       </div>
     </div>
 
+    <!-- OTA Updates Section -->
+    <div class="p-4 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center">
+          <RefreshCw class="w-5 h-5" :class="{ 'animate-spin': isCheckingUpdate }" />
+        </div>
+        <div>
+          <p class="text-xs font-black text-slate-900">التحديثات الهوائية التلقائية (OTA)</p>
+          <p class="text-[11px] text-slate-500 font-semibold">
+            {{ updateReadyToApply ? 'تم تنزيل تحديث جديد وجاهز للتفعيل' : 'تحديث التطبيق الفوري دون إعادة تثبيت' }}
+          </p>
+        </div>
+      </div>
+      <q-btn
+        unelevated
+        rounded
+        size="sm"
+        :color="updateReadyToApply ? 'positive' : 'primary'"
+        :loading="isCheckingUpdate"
+        :label="updateReadyToApply ? 'تفعيل الآن' : 'فحص'"
+        @click="handleUpdateClick"
+      />
+    </div>
+
     <!-- Edit Profile Dialog -->
     <EditProfileDialog
       v-model="showEditProfileModal"
@@ -271,13 +295,27 @@ import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth.store';
 import { useAttendanceStore } from '../../stores/attendance.store';
 import { useQuasar } from 'quasar';
-import { CalendarPlus, Clock, Lock, ChevronLeft } from 'lucide-vue-next';
+import { CalendarPlus, Clock, Lock, ChevronLeft, RefreshCw } from 'lucide-vue-next';
+import { getMediaUrl } from '../../utils/media';
+import {
+  updaterService,
+  isCheckingUpdate,
+  updateReadyToApply,
+} from '../../services/updater.service';
 import EditProfileDialog from './components/EditProfileDialog.vue';
 import ChangePasswordDialog from './components/ChangePasswordDialog.vue';
 
 const $q = useQuasar();
 const authStore = useAuthStore();
 const attendanceStore = useAttendanceStore();
+
+function handleUpdateClick() {
+  if (updateReadyToApply.value) {
+    updaterService.reloadApp();
+  } else {
+    updaterService.checkForUpdates(false);
+  }
+}
 
 const leavesData = computed(() => attendanceStore.leavesBalance);
 const allRequests = computed(() => {
@@ -352,9 +390,8 @@ function getStatusLabel(status: string) {
   return 'قيد الانتظار';
 }
 
-function getPhotoUrl(path: string) {
-  if (path.startsWith('http')) return path;
-  return `http://localhost:3010/${path.replace(/^\/+/, '')}`;
+function getPhotoUrl(path?: string) {
+  return getMediaUrl(path);
 }
 
 function formatDate(iso: string) {

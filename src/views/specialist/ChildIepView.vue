@@ -87,7 +87,7 @@
             </div>
             <a
               v-if="prog.filePath"
-              :href="`http://localhost:3010/${prog.filePath.replace(/^\/+/, '')}`"
+              :href="getMediaUrl(prog.filePath)"
               target="_blank"
               class="px-3 py-1.5 rounded-xl bg-blue-100 text-brand-blue hover:bg-brand-blue hover:text-white transition-all text-xs font-bold flex items-center gap-1"
             >
@@ -340,6 +340,7 @@ import {
   Download,
   Activity,
 } from 'lucide-vue-next';
+import { getMediaUrl } from '../../utils/media';
 
 const route = useRoute();
 const router = useRouter();
@@ -358,9 +359,8 @@ onMounted(async () => {
   }
 });
 
-function getPhotoUrl(path: string) {
-  if (path.startsWith('http')) return path;
-  return `http://localhost:3010/${path.replace(/^\/+/, '')}`;
+function getPhotoUrl(path?: string) {
+  return getMediaUrl(path);
 }
 
 function formatDate(d: string) {
