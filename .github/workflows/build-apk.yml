@@ -62,7 +62,7 @@ jobs:
       - name: Build Android Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon -Pandroid.suppressUnsupportedCompileSdk=35 --stacktrace
 
       - name: Prepare APK Output
         run: |
